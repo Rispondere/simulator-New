@@ -715,6 +715,20 @@ body {
     .graph-item-large h3 {
         font-size: 1.1rem;
     }
+    
+    .goal-graph {
+        padding: 15px;
+        max-height: 350px;
+    }
+    
+    .goal-graph h3 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+    
+    .goal-graph canvas {
+        max-height: 250px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -740,6 +754,20 @@ body {
     
     .total-amount {
         font-size: 1.4rem !important;
+    }
+    
+    .goal-graph {
+        padding: 12px;
+        max-height: 320px;
+    }
+    
+    .goal-graph h3 {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+    
+    .goal-graph canvas {
+        max-height: 220px;
     }
 }
 
@@ -779,16 +807,17 @@ body {
 ======================================== */
 .goal-graph {
     margin-top: 30px;
-    padding: 25px;
+    padding: 20px;
     background: linear-gradient(135deg, #fff5f8 0%, #ffffff 100%);
     border-radius: var(--border-radius);
     border: 2px solid var(--primary-light);
+    max-height: 400px;  /* 最大高さを制限 */
 }
 
 .goal-graph h3 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -796,6 +825,10 @@ body {
 
 .goal-graph h3 i {
     color: var(--primary-color);
+}
+
+.goal-graph canvas {
+    max-height: 280px;  /* キャンバスの最大高さを制限 */
 }
 
 /* 目標達成プランカード */
