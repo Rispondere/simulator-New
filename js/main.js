@@ -32,20 +32,27 @@ function formatNumberInput(value) {
     return num.toLocaleString('ja-JP');
 }
 
-// 目標金額入力フィールドのフォーマット設定
+// すべての金額入力フィールドのフォーマット設定
 function setupNumberFormatting() {
-    const numberInputs = ['goalAmount', 'goalPricePerSession', 'goalLivingCost'];
+    const numberInputs = [
+        'goalAmount', 
+        'goalPricePerSession', 
+        'goalLivingCost',
+        'pricePerSession',    // 本数ベースの単価
+        'hourlyRate',         // 時給
+        'livingCost'          // 月の固定費
+    ];
     
     numberInputs.forEach(id => {
         const input = document.getElementById(id);
         if (!input) return;
         
-        // フォーカス時：カンマを維持
+        // フォーカス時：全選択で編集しやすく
         input.addEventListener('focus', function() {
-            this.select(); // 全選択で編集しやすく
+            this.select();
         });
         
-        // 入力時：数字とカンマのみ許可
+        // 入力時：数字のみ許可し、自動的にカンマ区切りでフォーマット
         input.addEventListener('input', function(e) {
             let value = this.value.replace(/[^\d]/g, ''); // 数字以外を削除
             if (value) {
@@ -53,7 +60,7 @@ function setupNumberFormatting() {
             }
         });
         
-        // フォーカス解除時：フォーマット適用
+        // フォーカス解除時：最終フォーマット適用
         input.addEventListener('blur', function() {
             let value = parseFormattedNumber(this.value);
             if (value > 0) {
@@ -122,7 +129,7 @@ function switchCalculationMode(mode) {
 
 // 収益を計算する関数
 function calculateEarnings() {
-    const livingCost = parseFloat(document.getElementById('livingCost').value) || 0;
+    const livingCost = parseFormattedNumber(document.getElementById('livingCost').value);
     let dailyEarnings, weeklyEarnings, monthlyBase, daysPerWeek, monthlyWorkDays;
     let monthlyTotalSessions = 0;
     let pricePerSession = 0;
@@ -132,7 +139,7 @@ function calculateEarnings() {
 
     if (currentMode === 'session') {
         // 本数ベース計算
-        pricePerSession = parseFloat(document.getElementById('pricePerSession').value) || 0;
+        pricePerSession = parseFormattedNumber(document.getElementById('pricePerSession').value);
         sessionsPerDay = parseFloat(document.getElementById('sessionsPerDay').value) || 0;
         daysPerWeek = parseFloat(document.getElementById('daysPerWeek').value) || 0;
 
@@ -150,7 +157,7 @@ function calculateEarnings() {
         document.getElementById('breakdownMonthSessions').textContent = '約' + monthlyTotalSessions + '本';
     } else {
         // 時給ベース計算
-        const hourlyRate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+        const hourlyRate = parseFormattedNumber(document.getElementById('hourlyRate').value);
         const workHours = parseFloat(document.getElementById('workHours').value) || 0;
         const waitingHours = parseFloat(document.getElementById('waitingHours').value) || 0;
         daysPerWeek = parseFloat(document.getElementById('daysPerWeekHourly').value) || 0;
@@ -368,15 +375,24 @@ function updatePieChart(daily, weekly, monthly, livingCost, savings) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 5,
+                    right: 5,
+                    top: 5,
+                    bottom: 5
+                }
+            },
             plugins: {
                 legend: {
                     position: 'bottom',
                     labels: {
                         font: {
-                            size: 14,
+                            size: window.innerWidth <= 480 ? 11 : 14,
                             family: "'Noto Sans JP', sans-serif"
                         },
-                        padding: 15
+                        padding: window.innerWidth <= 480 ? 10 : 15,
+                        boxWidth: window.innerWidth <= 480 ? 12 : 15
                     }
                 },
                 tooltip: {
@@ -443,13 +459,33 @@ function updateBarChart(monthly, livingCost, savings) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 5,
+                    right: 5,
+                    top: 5,
+                    bottom: 5
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
                             return '¥' + value.toLocaleString();
+                        },
+                        font: {
+                            size: window.innerWidth <= 480 ? 9 : 11
                         }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: window.innerWidth <= 480 ? 9 : 11
+                        },
+                        maxRotation: window.innerWidth <= 480 ? 45 : 0,
+                        minRotation: window.innerWidth <= 480 ? 45 : 0
                     }
                 }
             },
@@ -458,10 +494,11 @@ function updateBarChart(monthly, livingCost, savings) {
                     position: 'bottom',
                     labels: {
                         font: {
-                            size: 14,
+                            size: window.innerWidth <= 480 ? 11 : 14,
                             family: "'Noto Sans JP', sans-serif"
                         },
-                        padding: 15
+                        padding: window.innerWidth <= 480 ? 10 : 15,
+                        boxWidth: window.innerWidth <= 480 ? 12 : 15
                     }
                 },
                 tooltip: {
@@ -523,6 +560,14 @@ function updateSavingsChart(monthlySavings) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 5,
+                    right: 5,
+                    top: 5,
+                    bottom: 5
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,
@@ -531,7 +576,7 @@ function updateSavingsChart(monthlySavings) {
                             return '¥' + value.toLocaleString();
                         },
                         font: {
-                            size: 12
+                            size: window.innerWidth <= 480 ? 9 : 12
                         }
                     },
                     grid: {
@@ -539,6 +584,13 @@ function updateSavingsChart(monthlySavings) {
                     }
                 },
                 x: {
+                    ticks: {
+                        font: {
+                            size: window.innerWidth <= 480 ? 9 : 11
+                        },
+                        maxRotation: window.innerWidth <= 480 ? 45 : 0,
+                        minRotation: window.innerWidth <= 480 ? 45 : 0
+                    },
                     grid: {
                         display: false
                     }
@@ -550,12 +602,13 @@ function updateSavingsChart(monthlySavings) {
                     position: 'top',
                     labels: {
                         font: {
-                            size: 14,
+                            size: window.innerWidth <= 480 ? 11 : 14,
                             family: "'Noto Sans JP', sans-serif",
                             weight: 'bold'
                         },
-                        padding: 15,
-                        color: '#198754'
+                        padding: window.innerWidth <= 480 ? 10 : 15,
+                        color: '#198754',
+                        boxWidth: window.innerWidth <= 480 ? 12 : 15
                     }
                 },
                 tooltip: {
@@ -626,12 +679,12 @@ function getCalculationData() {
             projectedYearlyIncome
         };
     } else {
-        const livingCost = parseFloat(document.getElementById('livingCost').value) || 0;
+        const livingCost = parseFormattedNumber(document.getElementById('livingCost').value);
         data.livingCost = livingCost;
     }
 
     if (currentMode === 'session') {
-        const pricePerSession = parseFloat(document.getElementById('pricePerSession').value) || 0;
+        const pricePerSession = parseFormattedNumber(document.getElementById('pricePerSession').value);
         const sessionsPerDay = parseFloat(document.getElementById('sessionsPerDay').value) || 0;
         const daysPerWeek = parseFloat(document.getElementById('daysPerWeek').value) || 0;
 
@@ -659,7 +712,7 @@ function getCalculationData() {
             monthlyTotalSessions
         };
     } else {
-        const hourlyRate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+        const hourlyRate = parseFormattedNumber(document.getElementById('hourlyRate').value);
         const workHours = parseFloat(document.getElementById('workHours').value) || 0;
         const waitingHours = parseFloat(document.getElementById('waitingHours').value) || 0;
         const daysPerWeek = parseFloat(document.getElementById('daysPerWeekHourly').value) || 0;
