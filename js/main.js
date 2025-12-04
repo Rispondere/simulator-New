@@ -888,13 +888,48 @@ function calculateGoal() {
     // 予想年収
     const projectedYearlyIncome = requiredMonthlyIncome * 12;
     
+    // 達成可能性の判定（物理的に不可能な場合に警告）
+    const isImpossible = requiredDaysPerWeek > 7 || requiredDaysPerMonth > 31;
+    const needsReview = requiredDaysPerWeek > 6.5 || requiredDaysPerMonth > 28;
+    
+    // 警告メッセージの表示/非表示
+    const warningElement = document.getElementById('goalWarning');
+    if (isImpossible) {
+        warningElement.style.display = 'block';
+        warningElement.className = 'goal-warning impossible';
+        warningElement.innerHTML = `
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>⚠️ 達成不可能な条件です</strong><br>
+            <span>週${requiredDaysPerWeek.toFixed(1)}日（月${requiredDaysPerMonth}日）の勤務が必要ですが、これは物理的に不可能です。</span><br>
+            <span class="suggestion">以下のいずれかを見直してください：</span>
+            <ul>
+                <li>・目標金額を下げる（現在: ${formatCurrency(goalAmount)}）</li>
+                <li>・達成期間を延ばす（現在: ${goalMonths}ヶ月）</li>
+                <li>・1本あたりの単価を上げる（現在: ${formatCurrency(pricePerSession)}）</li>
+                <li>・1日の本数を増やす（現在: ${sessionsPerDay}本）</li>
+                <li>・月の固定費を減らす（現在: ${formatCurrency(livingCost)}）</li>
+            </ul>
+        `;
+    } else if (needsReview) {
+        warningElement.style.display = 'block';
+        warningElement.className = 'goal-warning needs-review';
+        warningElement.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <strong>⚠️ 条件の見直しを推奨します</strong><br>
+            <span>週${requiredDaysPerWeek.toFixed(1)}日（月${requiredDaysPerMonth}日）の勤務が必要です。</span><br>
+            <span>かなりハードなスケジュールになります。無理のない計画をご検討ください。</span>
+        `;
+    } else {
+        warningElement.style.display = 'none';
+    }
+    
     // 結果を表示
     document.getElementById('displayGoalAmount').textContent = formatCurrency(goalAmount);
     document.getElementById('displayGoalMonths').textContent = goalMonths + 'ヶ月';
     document.getElementById('requiredMonthlySavings').textContent = formatCurrency(requiredMonthlySavings);
     document.getElementById('requiredMonthlyIncome').textContent = formatCurrency(requiredMonthlyIncome);
-    document.getElementById('requiredDaysPerWeek').textContent = requiredDaysPerWeek.toFixed(1) + '日';
-    document.getElementById('requiredDaysPerMonth').textContent = '約' + requiredDaysPerMonth + '日';
+    document.getElementById('requiredDaysPerWeek').textContent = requiredDaysPerWeek.toFixed(1) + '日' + (requiredDaysPerWeek > 7 ? ' ⚠️' : '');
+    document.getElementById('requiredDaysPerMonth').textContent = '約' + requiredDaysPerMonth + '日' + (requiredDaysPerMonth > 31 ? ' ⚠️' : '');
     document.getElementById('requiredDailyIncome').textContent = formatCurrency(dailyIncome);
     document.getElementById('projectedYearlyIncome').textContent = formatCurrency(projectedYearlyIncome);
     
