@@ -679,14 +679,15 @@ function getCalculationData() {
             projectedYearlyIncome
         };
     } else {
-        const livingCost = parseFormattedNumber(document.getElementById('livingCost').value);
-        data.livingCost = livingCost;
+        // 通常モード（本数ベース・時給ベース）の固定費を取得
+        data.livingCost = parseFormattedNumber(document.getElementById('livingCost').value);
     }
 
     if (currentMode === 'session') {
         const pricePerSession = parseFormattedNumber(document.getElementById('pricePerSession').value);
         const sessionsPerDay = parseFloat(document.getElementById('sessionsPerDay').value) || 0;
         const daysPerWeek = parseFloat(document.getElementById('daysPerWeek').value) || 0;
+        const livingCost = data.livingCost || 0;
 
         const dailyEarnings = pricePerSession * sessionsPerDay;
         const weeklyEarnings = dailyEarnings * daysPerWeek;
@@ -711,11 +712,12 @@ function getCalculationData() {
             monthlyWorkDays,
             monthlyTotalSessions
         };
-    } else {
+    } else if (currentMode === 'hourly') {
         const hourlyRate = parseFormattedNumber(document.getElementById('hourlyRate').value);
         const workHours = parseFloat(document.getElementById('workHours').value) || 0;
         const waitingHours = parseFloat(document.getElementById('waitingHours').value) || 0;
         const daysPerWeek = parseFloat(document.getElementById('daysPerWeekHourly').value) || 0;
+        const livingCost = data.livingCost || 0;
 
         const waitingPay = hourlyRate * 0.5 * waitingHours;
         const workPay = hourlyRate * workHours;
@@ -743,6 +745,9 @@ function getCalculationData() {
         };
     }
 
+    // デバッグ用：データを確認
+    console.log('getCalculationData:', data);
+    
     return data;
 }
 
@@ -767,56 +772,60 @@ function downloadExcel() {
     if (data.mode === 'goal') {
         wsData.push(
             ['計算方法', '目標金額逆算'],
-            ['目標金額', `¥${data.goalAmount.toLocaleString()}`],
-            ['達成期間', `${data.goalMonths}ヶ月`],
-            ['1本あたりの単価', `¥${data.pricePerSession.toLocaleString()}`],
-            ['1日の本数', `${data.sessionsPerDay}本`],
-            ['月の固定費', `¥${data.livingCost.toLocaleString()}`],
+            ['目標金額', `¥${(data.goalAmount || 0).toLocaleString()}`],
+            ['達成期間', `${data.goalMonths || 0}ヶ月`],
+            ['1本あたりの単価', `¥${(data.pricePerSession || 0).toLocaleString()}`],
+            ['1日の本数', `${data.sessionsPerDay || 0}本`],
+            ['月の固定費', `¥${(data.livingCost || 0).toLocaleString()}`],
             [],
             ['【目標達成プラン】'],
             ['項目', '値'],
-            ['毎月の必要貯金額', `¥${Math.round(data.requiredMonthlySavings).toLocaleString()}`],
-            ['必要な月収（手取り）', `¥${Math.round(data.requiredMonthlyIncome).toLocaleString()}`],
-            ['必要な週の勤務日数', `${data.requiredDaysPerWeek.toFixed(1)}日`],
-            ['必要な月の勤務日数', `約${data.requiredDaysPerMonth}日`],
-            ['必要な日給', `¥${Math.round(data.dailyIncome).toLocaleString()}`],
-            ['予想年収', `¥${Math.round(data.projectedYearlyIncome).toLocaleString()}`],
+            ['毎月の必要貯金額', `¥${Math.round(data.requiredMonthlySavings || 0).toLocaleString()}`],
+            ['必要な月収（手取り）', `¥${Math.round(data.requiredMonthlyIncome || 0).toLocaleString()}`],
+            ['必要な週の勤務日数', `${(data.requiredDaysPerWeek || 0).toFixed(1)}日`],
+            ['必要な月の勤務日数', `約${data.requiredDaysPerMonth || 0}日`],
+            ['必要な日給', `¥${Math.round(data.dailyIncome || 0).toLocaleString()}`],
+            ['予想年収', `¥${Math.round(data.projectedYearlyIncome || 0).toLocaleString()}`],
             [],
             ['※この計算結果はあくまで概算です。']
         );
     } else if (data.mode === 'session') {
         wsData.push(
             ['計算方法', '本数ベース'],
-            ['1本あたりの単価', `¥${data.pricePerSession.toLocaleString()}`],
-            ['1日の本数', `${data.sessionsPerDay}本`],
-            ['週の勤務日数', `${data.daysPerWeek}日`]
+            ['1本あたりの単価', `¥${(data.pricePerSession || 0).toLocaleString()}`],
+            ['1日の本数', `${data.sessionsPerDay || 0}本`],
+            ['週の勤務日数', `${data.daysPerWeek || 0}日`]
         );
-    } else {
+    } else if (data.mode === 'hourly') {
         wsData.push(
             ['計算方法', '時給ベース'],
-            ['時給', `¥${data.hourlyRate.toLocaleString()}`],
-            ['勤務時間', `${data.workHours}時間`],
-            ['待機時間', `${data.waitingHours}時間`],
-            ['週の勤務日数', `${data.daysPerWeek}日`]
+            ['時給', `¥${(data.hourlyRate || 0).toLocaleString()}`],
+            ['勤務時間', `${data.workHours || 0}時間`],
+            ['待機時間', `${data.waitingHours || 0}時間`],
+            ['週の勤務日数', `${data.daysPerWeek || 0}日`]
         );
     }
 
+    // 安全な数値処理
+    const safeLivingCost = isNaN(data.livingCost) ? 0 : data.livingCost;
+    const safeSavingsAmount = isNaN(data.savingsAmount) ? 0 : data.savingsAmount;
+    
     wsData.push(
-        ['月の固定費', `¥${data.livingCost.toLocaleString()}`],
+        ['月の固定費', `¥${safeLivingCost.toLocaleString()}`],
         [],
         ['【収益計算結果】'],
         ['項目', '金額'],
-        ['日給', `¥${Math.round(data.dailyEarnings).toLocaleString()}`],
-        ['週給', `¥${Math.round(data.weeklyEarnings).toLocaleString()}`],
-        ['月給（基本）', `¥${Math.round(data.monthlyBase).toLocaleString()}`],
-        ['月収（手取り）', `¥${Math.round(data.monthlyTotal).toLocaleString()}`],
-        ['年収見込み', `¥${Math.round(data.yearlyEarnings).toLocaleString()}`],
+        ['日給', `¥${Math.round(data.dailyEarnings || 0).toLocaleString()}`],
+        ['週給', `¥${Math.round(data.weeklyEarnings || 0).toLocaleString()}`],
+        ['月給（基本）', `¥${Math.round(data.monthlyBase || 0).toLocaleString()}`],
+        ['月収（手取り）', `¥${Math.round(data.monthlyTotal || 0).toLocaleString()}`],
+        ['年収見込み', `¥${Math.round(data.yearlyEarnings || 0).toLocaleString()}`],
         [],
         ['【貯金・生活費】'],
         ['項目', '金額'],
-        ['月の固定費', `¥${data.livingCost.toLocaleString()}`],
-        ['貯金可能額（月）', `¥${Math.round(data.savingsAmount).toLocaleString()}`],
-        ['貯金可能額（年）', `¥${Math.round(data.savingsAmount * 12).toLocaleString()}`],
+        ['月の固定費', `¥${safeLivingCost.toLocaleString()}`],
+        ['貯金可能額（月）', `¥${Math.round(safeSavingsAmount).toLocaleString()}`],
+        ['貯金可能額（年）', `¥${Math.round(safeSavingsAmount * 12).toLocaleString()}`],
         [],
         ['【詳細内訳】'],
         ['項目', '値'],
