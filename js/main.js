@@ -9,6 +9,7 @@ let currentMode = 'session'; // 'session' or 'hourly'
 // Chart.jsのインスタンス
 let pieChartInstance = null;
 let barChartInstance = null;
+let savingsChartInstance = null;
 
 // 数値をカンマ区切りの通貨形式に変換
 function formatCurrency(amount) {
@@ -25,16 +26,44 @@ function switchCalculationMode(mode) {
     event.target.closest('.tab-btn').classList.add('active');
     
     // フォームの表示を切り替え
-    if (mode === 'session') {
-        document.getElementById('sessionForm').style.display = 'block';
-        document.getElementById('hourlyForm').style.display = 'none';
+    document.getElementById('sessionForm').style.display = mode === 'session' ? 'block' : 'none';
+    document.getElementById('hourlyForm').style.display = mode === 'hourly' ? 'block' : 'none';
+    document.getElementById('goalForm').style.display = mode === 'goal' ? 'block' : 'none';
+    
+    // オプションセクションと固定費フィールドの表示切り替え
+    const optionalSection = document.getElementById('optionalSection');
+    const livingCostField = document.getElementById('livingCostField');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const goalCalculateBtn = document.getElementById('goalCalculateBtn');
+    
+    if (mode === 'goal') {
+        optionalSection.style.display = 'none';
+        livingCostField.style.display = 'none';
+        calculateBtn.style.display = 'none';
+        goalCalculateBtn.style.display = 'block';
     } else {
-        document.getElementById('sessionForm').style.display = 'none';
-        document.getElementById('hourlyForm').style.display = 'block';
+        optionalSection.style.display = 'block';
+        livingCostField.style.display = 'block';
+        calculateBtn.style.display = 'block';
+        goalCalculateBtn.style.display = 'none';
+    }
+    
+    // 結果表示の切り替え
+    document.getElementById('normalResults').style.display = mode === 'goal' ? 'none' : 'block';
+    document.getElementById('goalResults').style.display = mode === 'goal' ? 'block' : 'none';
+    
+    // グラフセクションの表示切り替え
+    const graphSection = document.querySelector('.graph-section');
+    if (graphSection) {
+        graphSection.style.display = mode === 'goal' ? 'none' : 'block';
     }
     
     // 再計算
-    calculateEarnings();
+    if (mode === 'goal') {
+        calculateGoal();
+    } else {
+        calculateEarnings();
+    }
 }
 
 // 収益を計算する関数
@@ -92,6 +121,7 @@ function calculateEarnings() {
     const monthlyTotal = monthlyBase;
     const savingsAmount = monthlyTotal - livingCost;
     const yearlyEarnings = monthlyTotal * 12;
+    const yearlySavings = savingsAmount * 12;
 
     // 結果を画面に表示
     document.getElementById('dailyEarnings').textContent = formatCurrency(dailyEarnings);
@@ -101,6 +131,7 @@ function calculateEarnings() {
     document.getElementById('yearlyEarnings').textContent = formatCurrency(yearlyEarnings);
     document.getElementById('livingCostDisplay').textContent = formatCurrency(livingCost);
     document.getElementById('savingsDisplay').textContent = formatCurrency(savingsAmount);
+    document.getElementById('yearlySavingsDisplay').textContent = formatCurrency(yearlySavings);
 
     // アニメーション効果を追加
     addCalculationAnimation();
@@ -246,6 +277,9 @@ function updateCharts(daily, weekly, monthly, livingCost, savings) {
     
     // 棒グラフ（月別収入推移）
     updateBarChart(monthly, livingCost, savings);
+    
+    // 貯金額累積グラフ
+    updateSavingsChart(savings);
 }
 
 // 円グラフを更新
@@ -393,17 +427,154 @@ function updateBarChart(monthly, livingCost, savings) {
     });
 }
 
+// 貯金額累積グラフを更新
+function updateSavingsChart(monthlySavings) {
+    const ctx = document.getElementById('savingsChart');
+    if (!ctx) return;
+    
+    // 既存のチャートを破棄
+    if (savingsChartInstance) {
+        savingsChartInstance.destroy();
+    }
+    
+    // 12ヶ月分の累積貯金額を計算
+    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    const cumulativeSavings = [];
+    
+    for (let i = 1; i <= 12; i++) {
+        cumulativeSavings.push(monthlySavings * i);
+    }
+    
+    savingsChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: '累積貯金額',
+                    data: cumulativeSavings,
+                    backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgba(25, 135, 84, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '¥' + value.toLocaleString();
+                        },
+                        font: {
+                            size: 12
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                            family: "'Noto Sans JP', sans-serif",
+                            weight: 'bold'
+                        },
+                        padding: 15,
+                        color: '#198754'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const monthNum = context.dataIndex + 1;
+                            const total = context.parsed.y;
+                            const monthly = monthlySavings;
+                            return [
+                                `累積貯金: ${formatCurrency(total)}`,
+                                `月々の貯金: ${formatCurrency(monthly)}`,
+                                `${monthNum}ヶ月目`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
 // ========================================
-// ダウンロード機能
+// Excelダウンロード機能
 // ========================================
 
 // 計算データを取得する関数
 function getCalculationData() {
-    const livingCost = parseFloat(document.getElementById('livingCost').value) || 0;
     let data = {
-        mode: currentMode,
-        livingCost: livingCost
+        mode: currentMode
     };
+
+    if (currentMode === 'goal') {
+        // 目標金額モードのデータ
+        const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 0;
+        const goalMonths = parseFloat(document.getElementById('goalMonths').value) || 1;
+        const pricePerSession = parseFloat(document.getElementById('goalPricePerSession').value) || 0;
+        const sessionsPerDay = parseFloat(document.getElementById('goalSessionsPerDay').value) || 0;
+        const livingCost = parseFloat(document.getElementById('goalLivingCost').value) || 0;
+        
+        const weeksPerMonth = 4.33;
+        const requiredMonthlySavings = goalAmount / goalMonths;
+        const requiredMonthlyIncome = requiredMonthlySavings + livingCost;
+        const dailyIncome = pricePerSession * sessionsPerDay;
+        const requiredDaysPerWeek = requiredMonthlyIncome / (dailyIncome * weeksPerMonth);
+        const requiredDaysPerMonth = Math.ceil(requiredDaysPerWeek * weeksPerMonth);
+        const projectedYearlyIncome = requiredMonthlyIncome * 12;
+        
+        data = {
+            ...data,
+            goalAmount,
+            goalMonths,
+            pricePerSession,
+            sessionsPerDay,
+            livingCost,
+            requiredMonthlySavings,
+            requiredMonthlyIncome,
+            dailyIncome,
+            requiredDaysPerWeek,
+            requiredDaysPerMonth,
+            projectedYearlyIncome
+        };
+    } else {
+        const livingCost = parseFloat(document.getElementById('livingCost').value) || 0;
+        data.livingCost = livingCost;
+    }
 
     if (currentMode === 'session') {
         const pricePerSession = parseFloat(document.getElementById('pricePerSession').value) || 0;
@@ -468,74 +639,6 @@ function getCalculationData() {
     return data;
 }
 
-// PDF出力
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const data = getCalculationData();
-    const today = new Date().toLocaleDateString('ja-JP');
-
-    // タイトル
-    doc.setFontSize(20);
-    doc.text('キャスト収益シミュレーション結果', 20, 20);
-    
-    doc.setFontSize(12);
-    doc.text(`作成日: ${today}`, 20, 30);
-
-    // 入力条件
-    doc.setFontSize(14);
-    doc.text('【入力条件】', 20, 45);
-    doc.setFontSize(11);
-    
-    if (data.mode === 'session') {
-        doc.text(`計算方法: 本数ベース`, 25, 55);
-        doc.text(`1本あたりの単価: ¥${data.pricePerSession.toLocaleString()}`, 25, 62);
-        doc.text(`1日の本数: ${data.sessionsPerDay}本`, 25, 69);
-        doc.text(`週の勤務日数: ${data.daysPerWeek}日`, 25, 76);
-    } else {
-        doc.text(`計算方法: 時給ベース`, 25, 55);
-        doc.text(`時給: ¥${data.hourlyRate.toLocaleString()}`, 25, 62);
-        doc.text(`勤務時間: ${data.workHours}時間`, 25, 69);
-        doc.text(`待機時間: ${data.waitingHours}時間`, 25, 76);
-        doc.text(`週の勤務日数: ${data.daysPerWeek}日`, 25, 83);
-    }
-    doc.text(`月の固定費: ¥${data.livingCost.toLocaleString()}`, 25, data.mode === 'session' ? 83 : 90);
-
-    // 計算結果
-    doc.setFontSize(14);
-    doc.text('【収益計算結果】', 20, data.mode === 'session' ? 100 : 107);
-    doc.setFontSize(11);
-    const resultY = data.mode === 'session' ? 110 : 117;
-    doc.text(`日給: ¥${Math.round(data.dailyEarnings).toLocaleString()}`, 25, resultY);
-    doc.text(`週給: ¥${Math.round(data.weeklyEarnings).toLocaleString()}`, 25, resultY + 7);
-    doc.text(`月給（基本）: ¥${Math.round(data.monthlyBase).toLocaleString()}`, 25, resultY + 14);
-    doc.text(`月収（手取り）: ¥${Math.round(data.monthlyTotal).toLocaleString()}`, 25, resultY + 21);
-    doc.text(`年収見込み: ¥${Math.round(data.yearlyEarnings).toLocaleString()}`, 25, resultY + 28);
-
-    // 貯金
-    doc.setFontSize(14);
-    doc.text('【貯金・生活費】', 20, resultY + 45);
-    doc.setFontSize(11);
-    doc.text(`月の固定費: ¥${data.livingCost.toLocaleString()}`, 25, resultY + 55);
-    doc.text(`貯金可能額（月）: ¥${Math.round(data.savingsAmount).toLocaleString()}`, 25, resultY + 62);
-    doc.text(`貯金可能額（年）: ¥${Math.round(data.savingsAmount * 12).toLocaleString()}`, 25, resultY + 69);
-
-    // 詳細内訳
-    doc.setFontSize(14);
-    doc.text('【詳細内訳】', 20, resultY + 86);
-    doc.setFontSize(11);
-    doc.text(`月の勤務日数（概算）: 約${data.monthlyWorkDays}日`, 25, resultY + 96);
-    if (data.mode === 'session' && data.monthlyTotalSessions) {
-        doc.text(`月の総本数（概算）: 約${data.monthlyTotalSessions}本`, 25, resultY + 103);
-    }
-
-    // フッター
-    doc.setFontSize(9);
-    doc.text('※この計算結果はあくまで概算です。実際の収入は状況により異なる場合があります。', 20, 280);
-
-    doc.save('キャスト収益シミュレーション.pdf');
-}
-
 // Excel出力
 function downloadExcel() {
     const data = getCalculationData();
@@ -554,7 +657,27 @@ function downloadExcel() {
     ];
 
     // 計算モードに応じて入力条件を追加
-    if (data.mode === 'session') {
+    if (data.mode === 'goal') {
+        wsData.push(
+            ['計算方法', '目標金額逆算'],
+            ['目標金額', `¥${data.goalAmount.toLocaleString()}`],
+            ['達成期間', `${data.goalMonths}ヶ月`],
+            ['1本あたりの単価', `¥${data.pricePerSession.toLocaleString()}`],
+            ['1日の本数', `${data.sessionsPerDay}本`],
+            ['月の固定費', `¥${data.livingCost.toLocaleString()}`],
+            [],
+            ['【目標達成プラン】'],
+            ['項目', '値'],
+            ['毎月の必要貯金額', `¥${Math.round(data.requiredMonthlySavings).toLocaleString()}`],
+            ['必要な月収（手取り）', `¥${Math.round(data.requiredMonthlyIncome).toLocaleString()}`],
+            ['必要な週の勤務日数', `${data.requiredDaysPerWeek.toFixed(1)}日`],
+            ['必要な月の勤務日数', `約${data.requiredDaysPerMonth}日`],
+            ['必要な日給', `¥${Math.round(data.dailyIncome).toLocaleString()}`],
+            ['予想年収', `¥${Math.round(data.projectedYearlyIncome).toLocaleString()}`],
+            [],
+            ['※この計算結果はあくまで概算です。']
+        );
+    } else if (data.mode === 'session') {
         wsData.push(
             ['計算方法', '本数ベース'],
             ['1本あたりの単価', `¥${data.pricePerSession.toLocaleString()}`],
@@ -614,107 +737,175 @@ function downloadExcel() {
     XLSX.writeFile(wb, 'キャスト収益シミュレーション.xlsx');
 }
 
-// Word出力（HTMLベースで簡易的に実装）
-function downloadWord() {
-    const data = getCalculationData();
-    const today = new Date().toLocaleDateString('ja-JP');
+// ========================================
+// 目標金額逆算機能
+// ========================================
 
-    // 入力条件のテーブル行を生成
-    let inputRows = '';
-    if (data.mode === 'session') {
-        inputRows = `
-            <tr><td>計算方法</td><td>本数ベース</td></tr>
-            <tr><td>1本あたりの単価</td><td>¥${data.pricePerSession.toLocaleString()}</td></tr>
-            <tr><td>1日の本数</td><td>${data.sessionsPerDay}本</td></tr>
-            <tr><td>週の勤務日数</td><td>${data.daysPerWeek}日</td></tr>
-        `;
-    } else {
-        inputRows = `
-            <tr><td>計算方法</td><td>時給ベース</td></tr>
-            <tr><td>時給</td><td>¥${data.hourlyRate.toLocaleString()}</td></tr>
-            <tr><td>勤務時間</td><td>${data.workHours}時間</td></tr>
-            <tr><td>待機時間</td><td>${data.waitingHours}時間</td></tr>
-            <tr><td>週の勤務日数</td><td>${data.daysPerWeek}日</td></tr>
-        `;
-    }
-
-    // 詳細内訳の行を生成
-    let detailRows = `<tr><td>月の勤務日数（概算）</td><td>約${data.monthlyWorkDays}日</td></tr>`;
-    if (data.mode === 'session' && data.monthlyTotalSessions) {
-        detailRows += `<tr><td>月の総本数（概算）</td><td>約${data.monthlyTotalSessions}本</td></tr>`;
-    }
-
-    // HTMLコンテンツを作成
-    let htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { font-family: 'Meiryo', sans-serif; padding: 40px; }
-                h1 { color: #e91e63; border-bottom: 3px solid #e91e63; padding-bottom: 10px; }
-                h2 { color: #9c27b0; margin-top: 30px; border-left: 5px solid #9c27b0; padding-left: 10px; }
-                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-                th { background-color: #ff69b4; color: white; }
-                .highlight { background-color: #fff5f8; font-weight: bold; }
-                .date { color: #666; font-size: 0.9em; }
-                .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 0.9em; color: #666; }
-            </style>
-        </head>
-        <body>
-            <h1>キャスト収益シミュレーション結果</h1>
-            <p class="date">作成日: ${today}</p>
-
-            <h2>入力条件</h2>
-            <table>https://github.com/Rispondere/simulator-New/blob/main/js/main.js
-                <tr><th>項目</th><th>値</th></tr>
-                ${inputRows}
-                <tr><td>月の固定費</td><td>¥${data.livingCost.toLocaleString()}</td></tr>
-            </table>
-
-            <h2>収益計算結果</h2>
-            <table>
-                <tr><th>項目</th><th>金額</th></tr>
-                <tr><td>日給</td><td>¥${Math.round(data.dailyEarnings).toLocaleString()}</td></tr>
-                <tr><td>週給</td><td>¥${Math.round(data.weeklyEarnings).toLocaleString()}</td></tr>
-                <tr><td>月給（基本）</td><td>¥${Math.round(data.monthlyBase).toLocaleString()}</td></tr>
-                <tr class="highlight"><td>月収（手取り）</td><td>¥${Math.round(data.monthlyTotal).toLocaleString()}</td></tr>
-                <tr class="highlight"><td>年収見込み</td><td>¥${Math.round(data.yearlyEarnings).toLocaleString()}</td></tr>
-            </table>
-
-            <h2>貯金・生活費</h2>
-            <table>
-                <tr><th>項目</th><th>金額</th></tr>
-                <tr><td>月の固定費</td><td>¥${data.livingCost.toLocaleString()}</td></tr>
-                <tr class="highlight"><td>貯金可能額（月）</td><td>¥${Math.round(data.savingsAmount).toLocaleString()}</td></tr>
-                <tr class="highlight"><td>貯金可能額（年）</td><td>¥${Math.round(data.savingsAmount * 12).toLocaleString()}</td></tr>
-            </table>
-
-            <h2>詳細内訳</h2>
-            <table>
-                <tr><th>項目</th><th>値</th></tr>
-                ${detailRows}
-            </table>
-
-            <div class="footer">
-                <p>※この計算結果はあくまで概算です。実際の収入は勤務状況や店舗の規定により異なる場合があります。</p>
-            </div>
-        </body>
-        </html>
-    `;
-
-    // BlobとしてHTML形式で保存（Wordで開ける）
-    const blob = new Blob(['\ufeff', htmlContent], {
-        type: 'application/msword'
-    });
+/**
+ * 目標金額から必要な勤務条件を逆算する
+ */
+function calculateGoal() {
+    // 入力値を取得
+    const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 0;
+    const goalMonths = parseFloat(document.getElementById('goalMonths').value) || 1;
+    const pricePerSession = parseFloat(document.getElementById('goalPricePerSession').value) || 0;
+    const sessionsPerDay = parseFloat(document.getElementById('goalSessionsPerDay').value) || 0;
+    const livingCost = parseFloat(document.getElementById('goalLivingCost').value) || 0;
     
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'キャスト収益シミュレーション.doc';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const weeksPerMonth = 4.33;
+    
+    // 毎月必要な貯金額を計算
+    const requiredMonthlySavings = goalAmount / goalMonths;
+    
+    // 必要な月収（手取り）= 毎月の貯金額 + 固定費
+    const requiredMonthlyIncome = requiredMonthlySavings + livingCost;
+    
+    // 日給を計算（本数ベース）
+    const dailyIncome = pricePerSession * sessionsPerDay;
+    
+    // 必要な週の勤務日数を計算
+    const requiredDaysPerWeek = requiredMonthlyIncome / (dailyIncome * weeksPerMonth);
+    
+    // 必要な月の勤務日数
+    const requiredDaysPerMonth = Math.ceil(requiredDaysPerWeek * weeksPerMonth);
+    
+    // 予想年収
+    const projectedYearlyIncome = requiredMonthlyIncome * 12;
+    
+    // 結果を表示
+    document.getElementById('displayGoalAmount').textContent = formatCurrency(goalAmount);
+    document.getElementById('displayGoalMonths').textContent = goalMonths + 'ヶ月';
+    document.getElementById('requiredMonthlySavings').textContent = formatCurrency(requiredMonthlySavings);
+    document.getElementById('requiredMonthlyIncome').textContent = formatCurrency(requiredMonthlyIncome);
+    document.getElementById('requiredDaysPerWeek').textContent = requiredDaysPerWeek.toFixed(1) + '日';
+    document.getElementById('requiredDaysPerMonth').textContent = '約' + requiredDaysPerMonth + '日';
+    document.getElementById('requiredDailyIncome').textContent = formatCurrency(dailyIncome);
+    document.getElementById('projectedYearlyIncome').textContent = formatCurrency(projectedYearlyIncome);
+    
+    // 達成イメージを更新
+    document.getElementById('currentCondition').textContent = 
+        `1本 ${formatCurrency(pricePerSession)} × ${sessionsPerDay}本/日`;
+    document.getElementById('month1').textContent = 
+        '貯金 ' + formatCurrency(requiredMonthlySavings * 1);
+    document.getElementById('month3').textContent = 
+        '貯金 ' + formatCurrency(requiredMonthlySavings * 3);
+    document.getElementById('month6').textContent = 
+        '貯金 ' + formatCurrency(requiredMonthlySavings * 6);
+    document.getElementById('goalAchieved').textContent = 
+        '貯金 ' + formatCurrency(goalAmount);
+    
+    // 目標達成グラフを描画
+    drawGoalChart(requiredMonthlySavings, goalMonths, goalAmount);
+}
+
+/**
+ * 目標達成グラフを描画
+ */
+function drawGoalChart(monthlySavings, months, goalAmount) {
+    const ctx = document.getElementById('goalChart');
+    if (!ctx) return;
+    
+    // 既存のグラフがあれば破棄
+    if (window.goalChartInstance) {
+        window.goalChartInstance.destroy();
+    }
+    
+    // 累積データを作成
+    const labels = [];
+    const cumulativeData = [];
+    
+    for (let i = 1; i <= months; i++) {
+        labels.push(i + 'ヶ月目');
+        cumulativeData.push(monthlySavings * i);
+    }
+    
+    // グラフを作成
+    window.goalChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '累積貯金額',
+                data: cumulativeData,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+            }, {
+                label: '目標金額',
+                data: Array(months).fill(goalAmount),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                borderWidth: 2,
+                borderDash: [10, 5],
+                fill: false,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 13,
+                            family: "'Noto Sans JP', sans-serif"
+                        },
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const datasetLabel = context.dataset.label;
+                            const value = context.parsed.y;
+                            return `${datasetLabel}: ${formatCurrency(value)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        },
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(200, 200, 200, 0.2)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
 }
