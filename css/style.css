@@ -1,0 +1,699 @@
+/* ========================================
+   リセットと基本設定
+======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* カラーパレット */
+    --primary-color: #ff69b4;
+    --primary-dark: #e91e63;
+    --primary-light: #ff9ecf;
+    --secondary-color: #9c27b0;
+    --accent-color: #ffd700;
+    
+    /* グレースケール */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --border-color: #e9ecef;
+    
+    /* シャドウ */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    
+    /* その他 */
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(135deg, #ffeef8 0%, #fff5f8 50%, #f0f4ff 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ========================================
+   ヘッダー
+======================================== */
+.header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 40px 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-content h1 i {
+    margin-right: 15px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    font-weight: 300;
+}
+
+/* ========================================
+   グリッドレイアウト
+======================================== */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* ========================================
+   カード共通スタイル
+======================================== */
+.card {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin-bottom: 25px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.card h2 i {
+    margin-right: 12px;
+    color: var(--primary-color);
+}
+
+/* ========================================
+   入力フォーム
+======================================== */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.form-group label i {
+    color: var(--primary-color);
+    margin-right: 8px;
+    width: 20px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+    font-family: 'Noto Sans JP', sans-serif;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+}
+
+.form-group input:hover {
+    border-color: var(--primary-light);
+}
+
+/* ========================================
+   ボタン
+======================================== */
+.btn-calculate {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    margin-top: 10px;
+}
+
+.btn-calculate:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-calculate:active {
+    transform: translateY(0);
+}
+
+.btn-calculate i {
+    margin-right: 10px;
+}
+
+/* ========================================
+   結果カード
+======================================== */
+.result-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.result-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 2px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.result-card:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateX(5px);
+}
+
+.result-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.result-card.daily .result-icon {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    color: #ff9800;
+}
+
+.result-card.weekly .result-icon {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0dcaf0;
+}
+
+.result-card.monthly .result-icon {
+    background: linear-gradient(135deg, #d1f2eb 0%, #a7e9d7 100%);
+    color: #20c997;
+}
+
+.result-card.fixed-display .result-icon {
+    background: linear-gradient(135deg, #cfe2ff 0%, #9ec5fe 100%);
+    color: #0d6efd;
+}
+
+.result-card.total .result-icon {
+    background: linear-gradient(135deg, #e7d7f5 0%, #d4b5e8 100%);
+    color: var(--secondary-color);
+}
+
+.result-card.yearly .result-icon {
+    background: linear-gradient(135deg, #ffd6e7 0%, #ffadd2 100%);
+    color: var(--primary-dark);
+}
+
+.result-info {
+    flex: 1;
+}
+
+.result-info h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.result-info .amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.total-amount {
+    color: var(--secondary-color);
+    font-size: 1.8rem !important;
+}
+
+.fixed-amount {
+    color: #0d6efd;
+}
+
+.living-amount {
+    color: #fd7e14;
+}
+
+.savings-amount {
+    color: #198754;
+    font-size: 1.8rem !important;
+}
+
+.result-card.living-cost .result-icon {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    color: #fd7e14;
+}
+
+.result-card.savings-display .result-icon {
+    background: linear-gradient(135deg, #d1f4e0 0%, #a3e4c4 100%);
+    color: #198754;
+}
+
+.result-card.savings-display {
+    animation: pulse 2s infinite;
+}
+
+/* ========================================
+   収益内訳
+======================================== */
+.breakdown {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid var(--border-color);
+}
+
+.breakdown h3 {
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.breakdown h3 i {
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.breakdown-item:last-child {
+    border-bottom: none;
+}
+
+.breakdown-item span:first-child {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.breakdown-item span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ========================================
+   フォーム区切り
+======================================== */
+.form-separator {
+    margin: 30px 0 20px 0;
+    padding-top: 20px;
+    border-top: 2px dashed var(--border-color);
+}
+
+.form-separator h3 {
+    font-size: 1rem;
+    color: var(--secondary-color);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.form-separator h3 i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.form-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* ========================================
+   ダウンロードセクション
+======================================== */
+.download-section {
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.download-section h3 {
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.download-section h3 i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.download-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.btn-download {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-download:active {
+    transform: translateY(0);
+}
+
+.btn-pdf {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.btn-excel {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: white;
+}
+
+.btn-word {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+}
+
+/* ========================================
+   計算方法タブ
+======================================== */
+.calculation-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-secondary);
+}
+
+.tab-btn:hover {
+    border-color: var(--primary-light);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-color: var(--primary-dark);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.tab-btn i {
+    font-size: 1.1rem;
+}
+
+.calculation-form {
+    animation: fadeIn 0.3s ease;
+}
+
+/* ========================================
+   グラフセクション
+======================================== */
+.graph-section {
+    margin-top: 30px;
+}
+
+.graph-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.graph-item {
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    padding: 25px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.graph-item:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-md);
+}
+
+.graph-item h3 {
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.graph-item canvas {
+    max-height: 300px;
+}
+
+/* ========================================
+   情報セクション
+======================================== */
+.info-section {
+    margin-top: 30px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.info-item {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+    border-radius: 10px;
+    transition: var(--transition);
+}
+
+.info-item:hover {
+    background: linear-gradient(135deg, #fff5f8 0%, #ffe4ec 100%);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.info-item i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.info-item h3 {
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.info-item p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========================================
+   フッター
+======================================== */
+.footer {
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   レスポンシブデザイン
+======================================== */
+@media (max-width: 1024px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .result-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .subtitle {
+        font-size: 0.95rem;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    .result-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid {
+        gap: 15px;
+    }
+    
+    .download-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .graph-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .calculation-tabs {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 25px 20px;
+    }
+    
+    .header-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .card h2 {
+        font-size: 1.2rem;
+    }
+    
+    .result-info .amount {
+        font-size: 1.2rem;
+    }
+    
+    .total-amount {
+        font-size: 1.4rem !important;
+    }
+}
+
+/* ========================================
+   アニメーション
+======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.result-card.total {
+    animation: pulse 2s infinite;
+}
