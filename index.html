@@ -101,10 +101,10 @@
                     <div id="goalForm" class="calculation-form" style="display: none;">
                     <div class="form-group">
                         <label for="goalAmount">
-                            <i class="fas fa-bullseye"></i> 目標金額（円）
+                            <i class="fas fa-bullseye"></i> 目標金額
                         </label>
-                        <input type="number" id="goalAmount" value="5000000" min="0" step="10000">
-                        <small class="form-hint">貯めたい目標金額を入力してください</small>
+                        <input type="text" id="goalAmount" value="5,000,000" placeholder="例：5,000,000">
+                        <small class="form-hint">貯めたい目標金額を入力してください（カンマ区切りで入力可能）</small>
                     </div>
 
                     <div class="form-group">
@@ -117,9 +117,9 @@
 
                     <div class="form-group">
                         <label for="goalPricePerSession">
-                            <i class="fas fa-yen-sign"></i> 1本あたりの単価（円）
+                            <i class="fas fa-yen-sign"></i> 1本あたりの単価
                         </label>
-                        <input type="number" id="goalPricePerSession" value="10000" min="0" step="100">
+                        <input type="text" id="goalPricePerSession" value="10,000" placeholder="例：10,000">
                     </div>
 
                     <div class="form-group">
@@ -131,9 +131,9 @@
 
                     <div class="form-group">
                         <label for="goalLivingCost">
-                            <i class="fas fa-home"></i> 月の固定費（円）
+                            <i class="fas fa-home"></i> 月の固定費
                         </label>
-                        <input type="number" id="goalLivingCost" value="150000" min="0" step="1000">
+                        <input type="text" id="goalLivingCost" value="150,000" placeholder="例：150,000">
                         <small class="form-hint">家賃、食費、光熱費などの合計</small>
                     </div>
                     </div>
