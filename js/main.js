@@ -486,36 +486,48 @@ function downloadPDF() {
     doc.setFontSize(14);
     doc.text('【入力条件】', 20, 45);
     doc.setFontSize(11);
-    doc.text(`1本あたりの単価: ¥${data.pricePerSession.toLocaleString()}`, 25, 55);
-    doc.text(`1日の本数: ${data.sessionsPerDay}本`, 25, 62);
-    doc.text(`週の勤務日数: ${data.daysPerWeek}日`, 25, 69);
-    doc.text(`月の固定額: ¥${data.fixedIncome.toLocaleString()}`, 25, 76);
-    doc.text(`月の固定費: ¥${data.livingCost.toLocaleString()}`, 25, 83);
+    
+    if (data.mode === 'session') {
+        doc.text(`計算方法: 本数ベース`, 25, 55);
+        doc.text(`1本あたりの単価: ¥${data.pricePerSession.toLocaleString()}`, 25, 62);
+        doc.text(`1日の本数: ${data.sessionsPerDay}本`, 25, 69);
+        doc.text(`週の勤務日数: ${data.daysPerWeek}日`, 25, 76);
+    } else {
+        doc.text(`計算方法: 時給ベース`, 25, 55);
+        doc.text(`時給: ¥${data.hourlyRate.toLocaleString()}`, 25, 62);
+        doc.text(`勤務時間: ${data.workHours}時間`, 25, 69);
+        doc.text(`待機時間: ${data.waitingHours}時間`, 25, 76);
+        doc.text(`週の勤務日数: ${data.daysPerWeek}日`, 25, 83);
+    }
+    doc.text(`月の固定費: ¥${data.livingCost.toLocaleString()}`, 25, data.mode === 'session' ? 83 : 90);
 
     // 計算結果
     doc.setFontSize(14);
-    doc.text('【収益計算結果】', 20, 100);
+    doc.text('【収益計算結果】', 20, data.mode === 'session' ? 100 : 107);
     doc.setFontSize(11);
-    doc.text(`日給: ¥${Math.round(data.dailyEarnings).toLocaleString()}`, 25, 110);
-    doc.text(`週給: ¥${Math.round(data.weeklyEarnings).toLocaleString()}`, 25, 117);
-    doc.text(`月給（基本）: ¥${Math.round(data.monthlyBase).toLocaleString()}`, 25, 124);
-    doc.text(`月収（手取り）: ¥${Math.round(data.monthlyTotal).toLocaleString()}`, 25, 131);
-    doc.text(`年収見込み: ¥${Math.round(data.yearlyEarnings).toLocaleString()}`, 25, 138);
+    const resultY = data.mode === 'session' ? 110 : 117;
+    doc.text(`日給: ¥${Math.round(data.dailyEarnings).toLocaleString()}`, 25, resultY);
+    doc.text(`週給: ¥${Math.round(data.weeklyEarnings).toLocaleString()}`, 25, resultY + 7);
+    doc.text(`月給（基本）: ¥${Math.round(data.monthlyBase).toLocaleString()}`, 25, resultY + 14);
+    doc.text(`月収（手取り）: ¥${Math.round(data.monthlyTotal).toLocaleString()}`, 25, resultY + 21);
+    doc.text(`年収見込み: ¥${Math.round(data.yearlyEarnings).toLocaleString()}`, 25, resultY + 28);
 
     // 貯金
     doc.setFontSize(14);
-    doc.text('【貯金・生活費】', 20, 155);
+    doc.text('【貯金・生活費】', 20, resultY + 45);
     doc.setFontSize(11);
-    doc.text(`月の固定費: ¥${data.livingCost.toLocaleString()}`, 25, 165);
-    doc.text(`貯金可能額（月）: ¥${Math.round(data.savingsAmount).toLocaleString()}`, 25, 172);
-    doc.text(`貯金可能額（年）: ¥${Math.round(data.savingsAmount * 12).toLocaleString()}`, 25, 179);
+    doc.text(`月の固定費: ¥${data.livingCost.toLocaleString()}`, 25, resultY + 55);
+    doc.text(`貯金可能額（月）: ¥${Math.round(data.savingsAmount).toLocaleString()}`, 25, resultY + 62);
+    doc.text(`貯金可能額（年）: ¥${Math.round(data.savingsAmount * 12).toLocaleString()}`, 25, resultY + 69);
 
     // 詳細内訳
     doc.setFontSize(14);
-    doc.text('【詳細内訳】', 20, 196);
+    doc.text('【詳細内訳】', 20, resultY + 86);
     doc.setFontSize(11);
-    doc.text(`月の勤務日数（概算）: 約${data.monthlyWorkDays}日`, 25, 206);
-    doc.text(`月の総本数（概算）: 約${data.monthlyTotalSessions}本`, 25, 213);
+    doc.text(`月の勤務日数（概算）: 約${data.monthlyWorkDays}日`, 25, resultY + 96);
+    if (data.mode === 'session' && data.monthlyTotalSessions) {
+        doc.text(`月の総本数（概算）: 約${data.monthlyTotalSessions}本`, 25, resultY + 103);
+    }
 
     // フッター
     doc.setFontSize(9);
@@ -533,16 +545,33 @@ function downloadExcel() {
     const wb = XLSX.utils.book_new();
     
     // データを配列形式で準備
-    const wsData = [
+    let wsData = [
         ['キャスト収益シミュレーション結果'],
         [`作成日: ${today}`],
         [],
         ['【入力条件】'],
-        ['項目', '値'],
-        ['1本あたりの単価', `¥${data.pricePerSession.toLocaleString()}`],
-        ['1日の本数', `${data.sessionsPerDay}本`],
-        ['週の勤務日数', `${data.daysPerWeek}日`],
-        ['月の固定額', `¥${data.fixedIncome.toLocaleString()}`],
+        ['項目', '値']
+    ];
+
+    // 計算モードに応じて入力条件を追加
+    if (data.mode === 'session') {
+        wsData.push(
+            ['計算方法', '本数ベース'],
+            ['1本あたりの単価', `¥${data.pricePerSession.toLocaleString()}`],
+            ['1日の本数', `${data.sessionsPerDay}本`],
+            ['週の勤務日数', `${data.daysPerWeek}日`]
+        );
+    } else {
+        wsData.push(
+            ['計算方法', '時給ベース'],
+            ['時給', `¥${data.hourlyRate.toLocaleString()}`],
+            ['勤務時間', `${data.workHours}時間`],
+            ['待機時間', `${data.waitingHours}時間`],
+            ['週の勤務日数', `${data.daysPerWeek}日`]
+        );
+    }
+
+    wsData.push(
         ['月の固定費', `¥${data.livingCost.toLocaleString()}`],
         [],
         ['【収益計算結果】'],
@@ -561,11 +590,17 @@ function downloadExcel() {
         [],
         ['【詳細内訳】'],
         ['項目', '値'],
-        ['月の勤務日数（概算）', `約${data.monthlyWorkDays}日`],
-        ['月の総本数（概算）', `約${data.monthlyTotalSessions}本`],
+        ['月の勤務日数（概算）', `約${data.monthlyWorkDays}日`]
+    );
+
+    if (data.mode === 'session' && data.monthlyTotalSessions) {
+        wsData.push(['月の総本数（概算）', `約${data.monthlyTotalSessions}本`]);
+    }
+
+    wsData.push(
         [],
         ['※この計算結果はあくまで概算です。']
-    ];
+    );
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     
@@ -583,6 +618,31 @@ function downloadExcel() {
 function downloadWord() {
     const data = getCalculationData();
     const today = new Date().toLocaleDateString('ja-JP');
+
+    // 入力条件のテーブル行を生成
+    let inputRows = '';
+    if (data.mode === 'session') {
+        inputRows = `
+            <tr><td>計算方法</td><td>本数ベース</td></tr>
+            <tr><td>1本あたりの単価</td><td>¥${data.pricePerSession.toLocaleString()}</td></tr>
+            <tr><td>1日の本数</td><td>${data.sessionsPerDay}本</td></tr>
+            <tr><td>週の勤務日数</td><td>${data.daysPerWeek}日</td></tr>
+        `;
+    } else {
+        inputRows = `
+            <tr><td>計算方法</td><td>時給ベース</td></tr>
+            <tr><td>時給</td><td>¥${data.hourlyRate.toLocaleString()}</td></tr>
+            <tr><td>勤務時間</td><td>${data.workHours}時間</td></tr>
+            <tr><td>待機時間</td><td>${data.waitingHours}時間</td></tr>
+            <tr><td>週の勤務日数</td><td>${data.daysPerWeek}日</td></tr>
+        `;
+    }
+
+    // 詳細内訳の行を生成
+    let detailRows = `<tr><td>月の勤務日数（概算）</td><td>約${data.monthlyWorkDays}日</td></tr>`;
+    if (data.mode === 'session' && data.monthlyTotalSessions) {
+        detailRows += `<tr><td>月の総本数（概算）</td><td>約${data.monthlyTotalSessions}本</td></tr>`;
+    }
 
     // HTMLコンテンツを作成
     let htmlContent = `
@@ -607,12 +667,9 @@ function downloadWord() {
             <p class="date">作成日: ${today}</p>
 
             <h2>入力条件</h2>
-            <table>
+            <table>https://github.com/Rispondere/simulator-New/blob/main/js/main.js
                 <tr><th>項目</th><th>値</th></tr>
-                <tr><td>1本あたりの単価</td><td>¥${data.pricePerSession.toLocaleString()}</td></tr>
-                <tr><td>1日の本数</td><td>${data.sessionsPerDay}本</td></tr>
-                <tr><td>週の勤務日数</td><td>${data.daysPerWeek}日</td></tr>
-                <tr><td>月の固定額</td><td>¥${data.fixedIncome.toLocaleString()}</td></tr>
+                ${inputRows}
                 <tr><td>月の固定費</td><td>¥${data.livingCost.toLocaleString()}</td></tr>
             </table>
 
@@ -637,8 +694,7 @@ function downloadWord() {
             <h2>詳細内訳</h2>
             <table>
                 <tr><th>項目</th><th>値</th></tr>
-                <tr><td>月の勤務日数（概算）</td><td>約${data.monthlyWorkDays}日</td></tr>
-                <tr><td>月の総本数（概算）</td><td>約${data.monthlyTotalSessions}本</td></tr>
+                ${detailRows}
             </table>
 
             <div class="footer">
