@@ -16,6 +16,60 @@ function formatCurrency(amount) {
     return '¥' + Math.round(amount).toLocaleString('ja-JP');
 }
 
+// カンマ区切りの文字列を数値に変換
+function parseFormattedNumber(value) {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+        // カンマと円マークを削除して数値に変換
+        return parseFloat(value.replace(/[,¥]/g, '')) || 0;
+    }
+    return 0;
+}
+
+// 入力フィールドに数値をカンマ区切りでフォーマット
+function formatNumberInput(value) {
+    const num = parseFormattedNumber(value);
+    return num.toLocaleString('ja-JP');
+}
+
+// 目標金額入力フィールドのフォーマット設定
+function setupNumberFormatting() {
+    const numberInputs = ['goalAmount', 'goalPricePerSession', 'goalLivingCost'];
+    
+    numberInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        
+        // フォーカス時：カンマを維持
+        input.addEventListener('focus', function() {
+            this.select(); // 全選択で編集しやすく
+        });
+        
+        // 入力時：数字とカンマのみ許可
+        input.addEventListener('input', function(e) {
+            let value = this.value.replace(/[^\d]/g, ''); // 数字以外を削除
+            if (value) {
+                this.value = formatNumberInput(value);
+            }
+        });
+        
+        // フォーカス解除時：フォーマット適用
+        input.addEventListener('blur', function() {
+            let value = parseFormattedNumber(this.value);
+            if (value > 0) {
+                this.value = formatNumberInput(value);
+            } else {
+                this.value = '0';
+            }
+        });
+    });
+}
+
+// ページ読み込み時にフォーマット設定を適用
+window.addEventListener('DOMContentLoaded', function() {
+    setupNumberFormatting();
+});
+
 // 計算モードを切り替える
 function switchCalculationMode(mode) {
     currentMode = mode;
@@ -542,12 +596,12 @@ function getCalculationData() {
     };
 
     if (currentMode === 'goal') {
-        // 目標金額モードのデータ
-        const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 0;
+        // 目標金額モードのデータ（カンマ区切りの文字列を数値に変換）
+        const goalAmount = parseFormattedNumber(document.getElementById('goalAmount').value);
         const goalMonths = parseFloat(document.getElementById('goalMonths').value) || 1;
-        const pricePerSession = parseFloat(document.getElementById('goalPricePerSession').value) || 0;
+        const pricePerSession = parseFormattedNumber(document.getElementById('goalPricePerSession').value);
         const sessionsPerDay = parseFloat(document.getElementById('goalSessionsPerDay').value) || 0;
-        const livingCost = parseFloat(document.getElementById('goalLivingCost').value) || 0;
+        const livingCost = parseFormattedNumber(document.getElementById('goalLivingCost').value);
         
         const weeksPerMonth = 4.33;
         const requiredMonthlySavings = goalAmount / goalMonths;
@@ -745,12 +799,12 @@ function downloadExcel() {
  * 目標金額から必要な勤務条件を逆算する
  */
 function calculateGoal() {
-    // 入力値を取得
-    const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 0;
+    // 入力値を取得（カンマ区切りの文字列を数値に変換）
+    const goalAmount = parseFormattedNumber(document.getElementById('goalAmount').value);
     const goalMonths = parseFloat(document.getElementById('goalMonths').value) || 1;
-    const pricePerSession = parseFloat(document.getElementById('goalPricePerSession').value) || 0;
+    const pricePerSession = parseFormattedNumber(document.getElementById('goalPricePerSession').value);
     const sessionsPerDay = parseFloat(document.getElementById('goalSessionsPerDay').value) || 0;
-    const livingCost = parseFloat(document.getElementById('goalLivingCost').value) || 0;
+    const livingCost = parseFormattedNumber(document.getElementById('goalLivingCost').value);
     
     const weeksPerMonth = 4.33;
     
