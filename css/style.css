@@ -305,6 +305,17 @@ body {
     animation: pulse 2s infinite;
 }
 
+.result-card.yearly-savings .result-icon {
+    background: linear-gradient(135deg, #d4edda 0%, #a3cfbb 100%);
+    color: #155724;
+}
+
+.yearly-savings-amount {
+    color: #155724;
+    font-size: 1.7rem !important;
+    font-weight: 800;
+}
+
 /* ========================================
    収益内訳
 ======================================== */
@@ -403,12 +414,6 @@ body {
     color: var(--primary-color);
 }
 
-.download-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-}
-
 .btn-download {
     padding: 14px 20px;
     border: none;
@@ -433,19 +438,45 @@ body {
     transform: translateY(0);
 }
 
-.btn-pdf {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    color: white;
-}
-
-.btn-excel {
+.btn-excel-large {
+    width: 100%;
+    padding: 18px 24px;
     background: linear-gradient(135deg, #28a745 0%, #218838 100%);
     color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 0;
 }
 
-.btn-word {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-    color: white;
+.btn-excel-large:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+.btn-excel-large:active {
+    transform: translateY(0);
+}
+
+.btn-excel-large i {
+    font-size: 1.5rem;
+}
+
+.download-hint {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.5;
 }
 
 /* ========================================
@@ -531,6 +562,46 @@ body {
 
 .graph-item canvas {
     max-height: 300px;
+}
+
+.graph-container-single {
+    margin-top: 30px;
+}
+
+.graph-item-large {
+    background: linear-gradient(135deg, #f0fff4 0%, #e6f9eb 100%);
+    padding: 30px;
+    border-radius: 12px;
+    border: 3px solid #198754;
+    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.15);
+    transition: var(--transition);
+}
+
+.graph-item-large:hover {
+    border-color: #146c43;
+    box-shadow: 0 8px 30px rgba(25, 135, 84, 0.25);
+    transform: translateY(-3px);
+}
+
+.graph-item-large h3 {
+    font-size: 1.3rem;
+    color: #198754;
+    margin-bottom: 25px;
+    font-weight: 700;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.graph-item-large h3::before {
+    content: '💰';
+    font-size: 1.5rem;
+}
+
+.graph-item-large canvas {
+    max-height: 350px;
 }
 
 /* ========================================
@@ -628,8 +699,9 @@ body {
         gap: 15px;
     }
     
-    .download-buttons {
-        grid-template-columns: 1fr;
+    .btn-excel-large {
+        font-size: 1rem;
+        padding: 16px 20px;
     }
     
     .graph-container {
@@ -638,6 +710,10 @@ body {
     
     .calculation-tabs {
         flex-direction: column;
+    }
+    
+    .graph-item-large h3 {
+        font-size: 1.1rem;
     }
 }
 
@@ -696,4 +772,208 @@ body {
 
 .result-card.total {
     animation: pulse 2s infinite;
+}
+
+/* ========================================
+   目標達成グラフ
+======================================== */
+.goal-graph {
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #fff5f8 0%, #ffffff 100%);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--primary-light);
+}
+
+.goal-graph h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.goal-graph h3 i {
+    color: var(--primary-color);
+}
+
+/* 目標達成プランカード */
+.goal-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.goal-card {
+    background: white;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.goal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.goal-card.primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+.goal-card i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.goal-card.primary i {
+    color: white;
+}
+
+.goal-card h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.goal-card.primary h3 {
+    color: white;
+}
+
+.goal-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.goal-card.primary .goal-amount {
+    color: white;
+}
+
+/* 目標達成プラン */
+.goal-plan {
+    background: white;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 25px;
+}
+
+.goal-plan h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.goal-plan h3 i {
+    color: var(--primary-color);
+}
+
+.plan-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px;
+    margin-bottom: 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.plan-item:hover {
+    background: linear-gradient(to right, var(--bg-primary), #ffeef8);
+}
+
+.plan-item.success {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border: 2px solid #4caf50;
+}
+
+.plan-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.plan-label i {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.plan-item.success .plan-label i {
+    color: #4caf50;
+}
+
+.plan-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.plan-value.highlight {
+    color: var(--primary-dark);
+    font-size: 1.4rem;
+}
+
+/* 目標達成イメージ */
+.goal-breakdown {
+    background: white;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 25px;
+}
+
+.goal-breakdown h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.goal-breakdown h3 i {
+    color: var(--primary-color);
+}
+
+.timeline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-light);
+}
+
+.timeline-item.success {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-left: 4px solid #4caf50;
+}
+
+.timeline-label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.timeline-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.timeline-item.success .timeline-value {
+    color: #2e7d32;
 }
