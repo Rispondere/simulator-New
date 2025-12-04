@@ -849,32 +849,39 @@ function drawGoalChart(monthlySavings, months, goalAmount) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            aspectRatio: 2.5,  // グラフの縦横比を調整（横長にする）
             plugins: {
                 legend: {
                     display: true,
                     position: 'top',
                     labels: {
                         font: {
-                            size: 13,
+                            size: 12,
                             family: "'Noto Sans JP', sans-serif"
                         },
-                        padding: 15,
-                        usePointStyle: true
+                        padding: 10,
+                        usePointStyle: true,
+                        boxWidth: 12
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     padding: 12,
                     titleFont: {
-                        size: 14
+                        size: 13
                     },
                     bodyFont: {
-                        size: 13
+                        size: 12
                     },
                     callbacks: {
                         label: function(context) {
                             const datasetLabel = context.dataset.label;
                             const value = context.parsed.y;
+                            // 100万円以上の場合は万円も併記
+                            if (value >= 1000000) {
+                                const manYen = Math.round(value / 10000);
+                                return `${datasetLabel}: ${formatCurrency(value)} (${manYen.toLocaleString('ja-JP')}万円)`;
+                            }
                             return `${datasetLabel}: ${formatCurrency(value)}`;
                         }
                     }
@@ -885,11 +892,16 @@ function drawGoalChart(monthlySavings, months, goalAmount) {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
+                            // 100万円以上の場合は「万円」単位で表示
+                            if (value >= 1000000) {
+                                return '¥' + Math.round(value / 10000).toLocaleString('ja-JP') + '万';
+                            }
                             return formatCurrency(value);
                         },
                         font: {
-                            size: 11
-                        }
+                            size: 10
+                        },
+                        maxTicksLimit: 6  // Y軸の目盛りを最大6個に制限
                     },
                     grid: {
                         color: 'rgba(200, 200, 200, 0.2)'
@@ -898,8 +910,10 @@ function drawGoalChart(monthlySavings, months, goalAmount) {
                 x: {
                     ticks: {
                         font: {
-                            size: 11
-                        }
+                            size: 10
+                        },
+                        maxRotation: 45,  // ラベルを45度回転
+                        minRotation: 45
                     },
                     grid: {
                         display: false
