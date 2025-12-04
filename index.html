@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャスト収益シミュレーター</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-calculator"></i> キャスト収益シミュレーター</h1>
+                <p class="subtitle">あなたの収入を簡単にシミュレーション</p>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <div class="grid-container">
+                <!-- 左側：入力フォーム -->
+                <section class="card input-section">
+                    <h2><i class="fas fa-edit"></i> 勤務条件を入力</h2>
+                    
+                    <!-- 計算方法切り替えタブ -->
+                    <div class="calculation-tabs">
+                        <button class="tab-btn active" onclick="switchCalculationMode('session')">
+                            <i class="fas fa-users"></i> 本数計算
+                        </button>
+                        <button class="tab-btn" onclick="switchCalculationMode('hourly')">
+                            <i class="fas fa-clock"></i> 時給計算
+                        </button>
+                    </div>
+
+                    <!-- 本数計算フォーム -->
+                    <div id="sessionForm" class="calculation-form">
+                    <div class="form-group">
+                        <label for="pricePerSession">
+                            <i class="fas fa-yen-sign"></i> 1本あたりの単価（円）
+                        </label>
+                        <input type="number" id="pricePerSession" value="10000" min="0" step="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sessionsPerDay">
+                            <i class="fas fa-users"></i> 1日の本数
+                        </label>
+                        <input type="number" id="sessionsPerDay" value="3" min="0" max="20" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="daysPerWeek">
+                            <i class="fas fa-calendar-week"></i> 週の勤務日数（日）
+                        </label>
+                        <input type="number" id="daysPerWeek" value="5" min="0" max="7" step="1">
+                    </div>
+
+                    </div>
+
+                    <!-- 時給計算フォーム -->
+                    <div id="hourlyForm" class="calculation-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="hourlyRate">
+                            <i class="fas fa-yen-sign"></i> 時給（円）
+                        </label>
+                        <input type="number" id="hourlyRate" value="3000" min="0" step="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="workHours">
+                            <i class="fas fa-clock"></i> 1日の勤務時間（時間）
+                        </label>
+                        <input type="number" id="workHours" value="8" min="0" max="24" step="0.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="waitingHours">
+                            <i class="fas fa-hourglass-half"></i> 1日の待機時間（時間）
+                        </label>
+                        <input type="number" id="waitingHours" value="2" min="0" max="24" step="0.5">
+                        <small class="form-hint">待機時間は時給の50%で計算されます</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="daysPerWeekHourly">
+                            <i class="fas fa-calendar-week"></i> 週の勤務日数（日）
+                        </label>
+                        <input type="number" id="daysPerWeekHourly" value="5" min="0" max="7" step="1">
+                    </div>
+                    </div>
+
+                    <div class="form-separator">
+                        <h3><i class="fas fa-wallet"></i> 生活費・貯金設定（オプション）</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="livingCost">
+                            <i class="fas fa-home"></i> 月の固定費（家賃・食費等・円）
+                        </label>
+                        <input type="number" id="livingCost" value="0" min="0" step="1000" placeholder="家賃・食費・光熱費など">
+                        <small class="form-hint">家賃、食費、光熱費、通信費、美容代などの合計</small>
+                    </div>
+
+                    <button class="btn-calculate" onclick="calculateEarnings()">
+                        <i class="fas fa-calculator"></i> 収益を計算する
+                    </button>
+                </section>
+
+                <!-- 右側：収益表示 -->
+                <section class="card results-section">
+                    <h2><i class="fas fa-chart-line"></i> 収益シミュレーション結果</h2>
+                    
+                    <div class="result-cards">
+                        <div class="result-card daily">
+                            <div class="result-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>日給</h3>
+                                <p class="amount" id="dailyEarnings">¥0</p>
+                            </div>
+                        </div>
+
+                        <div class="result-card weekly">
+                            <div class="result-icon">
+                                <i class="fas fa-calendar-week"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>週給</h3>
+                                <p class="amount" id="weeklyEarnings">¥0</p>
+                            </div>
+                        </div>
+
+                        <div class="result-card monthly">
+                            <div class="result-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>月給（基本）</h3>
+                                <p class="amount" id="monthlyBase">¥0</p>
+                            </div>
+                        </div>
+
+                        <div class="result-card total">
+                            <div class="result-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>月収（手取り）</h3>
+                                <p class="amount total-amount" id="monthlyTotal">¥0</p>
+                            </div>
+                        </div>
+
+                        <div class="result-card yearly">
+                            <div class="result-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>年収見込み</h3>
+                                <p class="amount" id="yearlyEarnings">¥0</p>
+                            </div>
+                        </div>
+
+                        <div class="result-card living-cost" style="grid-column: 1 / -1;">
+                            <div class="result-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>月の固定費</h3>
+                                <p class="amount living-amount" id="livingCostDisplay">¥0</p>
+                            </div>
+                        </div>
+
+                        <div class="result-card savings-display" style="grid-column: 1 / -1;">
+                            <div class="result-icon">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                            <div class="result-info">
+                                <h3>貯金可能額（月）</h3>
+                                <p class="amount savings-amount" id="savingsDisplay">¥0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 収益内訳 -->
+                    <div class="breakdown">
+                        <h3><i class="fas fa-list"></i> 収益内訳</h3>
+                        <div class="breakdown-item">
+                            <span>1本あたりの単価</span>
+                            <span id="breakdownPrice">¥10,000</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>1日の本数</span>
+                            <span id="breakdownSessions">3本</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>週の勤務日数</span>
+                            <span id="breakdownDays">5日</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>月の勤務日数（概算）</span>
+                            <span id="breakdownMonthDays">約22日</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>月の総本数（概算）</span>
+                            <span id="breakdownMonthSessions">約66本</span>
+                        </div>
+                    </div>
+
+                    <!-- ダウンロードボタン -->
+                    <div class="download-section">
+                        <h3><i class="fas fa-download"></i> 結果をダウンロード</h3>
+                        <div class="download-buttons">
+                            <button class="btn-download btn-pdf" onclick="downloadPDF()">
+                                <i class="fas fa-file-pdf"></i> PDFで保存
+                            </button>
+                            <button class="btn-download btn-excel" onclick="downloadExcel()">
+                                <i class="fas fa-file-excel"></i> Excelで保存
+                            </button>
+                            <button class="btn-download btn-word" onclick="downloadWord()">
+                                <i class="fas fa-file-word"></i> Wordで保存
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- グラフセクション -->
+            <section class="card graph-section">
+                <h2><i class="fas fa-chart-bar"></i> 収益グラフ</h2>
+                <div class="graph-container">
+                    <div class="graph-item">
+                        <h3>収益内訳（円グラフ）</h3>
+                        <canvas id="pieChart" style="height: 300px;"></canvas>
+                    </div>
+                    <div class="graph-item">
+                        <h3>月別収入推移（棒グラフ）</h3>
+                        <canvas id="barChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 追加情報セクション -->
+            <section class="card info-section">
+                <h2><i class="fas fa-info-circle"></i> ご利用ガイド</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>使い方</h3>
+                        <p>左側のフォームに勤務条件を入力して、「収益を計算する」ボタンをクリックしてください。リアルタイムで収益が計算されます。</p>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-calculator"></i>
+                        <h3>計算方法</h3>
+                        <p>日給 = 単価 × 本数<br>月給 = 日給 × 週勤務日数 × 4.33週<br>手取り = 月給 + 固定額</p>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>注意事項</h3>
+                        <p>この計算結果はあくまで概算です。実際の収入は、勤務状況や店舗の規定により異なる場合があります。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- フッター -->
+        <footer class="footer">
+            <p>&copy; 2025 キャスト収益シミュレーター - 簡単・分かりやすい収入計算ツール</p>
+        </footer>
+    </div>
+
+    <!-- Chart.js - グラフ描画ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- PDF生成ライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Excel生成ライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Word生成ライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.42.3/docxtemplater.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>
