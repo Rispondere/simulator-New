@@ -142,9 +142,24 @@ body {
     padding: 14px 18px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
     transition: var(--transition);
     font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+/* 金額入力フィールド専用スタイル */
+.form-group input[type="text"] {
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    padding-right: 35px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e91e63"><text x="6" y="18" font-size="16" font-weight="bold">¥</text></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
 }
 
 .form-group input:focus {
