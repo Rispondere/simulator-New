@@ -44,6 +44,8 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* ========================================
@@ -95,6 +97,8 @@ body {
     padding: 30px;
     box-shadow: var(--shadow-md);
     transition: var(--transition);
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .card:hover {
@@ -142,24 +146,25 @@ body {
     padding: 14px 18px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 400;
     transition: var(--transition);
     font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* 金額入力フィールド専用スタイル（text型） */
+.form-group input[type="text"] {
+    text-align: right;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--primary-dark);
     letter-spacing: 0.5px;
 }
 
-/* 金額入力フィールド専用スタイル */
-.form-group input[type="text"] {
-    text-align: right;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--primary-dark);
-    padding-right: 35px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e91e63"><text x="6" y="18" font-size="16" font-weight="bold">¥</text></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 20px;
+/* 数値入力フィールド（本数、日数など） */
+.form-group input[type="number"] {
+    font-size: 1.05rem;
+    font-weight: 500;
 }
 
 .form-group input:focus {
@@ -545,6 +550,8 @@ body {
 ======================================== */
 .graph-section {
     margin-top: 30px;
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .graph-container {
@@ -552,6 +559,8 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     margin-top: 20px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .graph-item {
@@ -560,6 +569,8 @@ body {
     border-radius: 10px;
     border: 2px solid var(--border-color);
     transition: var(--transition);
+    overflow: hidden;
+    max-width: 100%;
 }
 
 .graph-item:hover {
@@ -577,6 +588,9 @@ body {
 
 .graph-item canvas {
     max-height: 300px;
+    max-width: 100%;
+    width: 100% !important;
+    height: auto !important;
 }
 
 .graph-container-single {
@@ -721,6 +735,20 @@ body {
     
     .graph-container {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .graph-item {
+        padding: 15px;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .graph-item canvas {
+        max-height: 250px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
     }
     
     .calculation-tabs {
@@ -769,6 +797,21 @@ body {
     
     .total-amount {
         font-size: 1.4rem !important;
+    }
+    
+    .graph-item {
+        padding: 12px;
+    }
+    
+    .graph-item h3 {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+    
+    .graph-item canvas {
+        max-height: 220px !important;
+        max-width: 100% !important;
+        width: 100% !important;
     }
     
     .goal-graph {
